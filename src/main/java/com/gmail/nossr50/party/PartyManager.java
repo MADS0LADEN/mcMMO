@@ -274,7 +274,6 @@ public final class PartyManager {
         requireNonNull(party, "party cannot be null!");
 
         final LinkedHashMap<UUID, String> members = party.getMembers();
-        final String playerName = player.getName();
 
         if (party.getLeader().getUniqueId().equals(player.getUniqueId())) {
             members.remove(player.getUniqueId());
@@ -293,14 +292,14 @@ public final class PartyManager {
             members.remove(player.getUniqueId());
         }
 
-        if (player.isOnline()) {
-            party.getOnlineMembers().remove(player.getPlayer());
-        }
-
         if (members.isEmpty()) {
             parties.remove(party);
         } else {
-            informPartyMembersQuit(party, playerName);
+            informPartyMembersQuit(party, player);
+        }
+
+        if (player.isOnline()) {
+            party.getOnlineMembers().remove(player.getPlayer());
         }
     }
 
@@ -545,9 +544,8 @@ public final class PartyManager {
         requireNonNull(party, "party cannot be null!");
 
         Player player = mmoPlayer.getPlayer();
-        String playerName = player.getName();
 
-        informPartyMembersJoin(party, playerName);
+        informPartyMembersJoin(party, player);
         mmoPlayer.setParty(party);
         party.getMembers().put(player.getUniqueId(), player.getName());
         party.getOnlineMembers().add(player);
@@ -884,25 +882,37 @@ public final class PartyManager {
 
     /**
      * Notify party members when a player joins.
+     * Vanished joiners are only announced to members who can see them.
      *
      * @param party The concerned party
-     * @param playerName The name of the player that joined
+     * @param subject The player that joined
      */
-    private void informPartyMembersJoin(Party party, String playerName) {
+    private void informPartyMembersJoin(Party party, Player subject) {
         for (Player member : party.getOnlineMembers()) {
-            member.sendMessage(LocaleLoader.getString("Party.InformedOnJoin", playerName));
+            if (member.equals(subject) || member.canSee(subject)) {
+                member.sendMessage(LocaleLoader.getString("Party.InformedOnJoin", subject.getName()));
+            }
         }
     }
 
     /**
      * Notify party members when a party member quits.
+     * Vanished leavers are only announced to members who can see them.
      *
      * @param party The concerned party
-     * @param playerName The name of the player that left
+     * @param subject The player that left
      */
-    private void informPartyMembersQuit(Party party, String playerName) {
+    private void informPartyMembersQuit(Party party, OfflinePlayer subject) {
+        final Player subjectPlayer = subject.isOnline() ? subject.getPlayer() : null;
+        final String playerName = subject.getName();
+
         for (Player member : party.getOnlineMembers()) {
-            member.sendMessage(LocaleLoader.getString("Party.InformedOnQuit", playerName));
+            if (member.getUniqueId().equals(subject.getUniqueId())) {
+                continue;
+            }
+            if (subjectPlayer == null || member.canSee(subjectPlayer)) {
+                member.sendMessage(LocaleLoader.getString("Party.InformedOnQuit", playerName));
+            }
         }
     }
 }

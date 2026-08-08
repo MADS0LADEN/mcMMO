@@ -233,6 +233,11 @@ public class PtpCommand implements TabExecutor {
         McMMOPlayer mcMMOTarget = UserManager.getPlayer(targetName);
         Player target = mcMMOTarget.getPlayer();
 
+        if (!target.canSee(player)) {
+            player.sendMessage(LocaleLoader.getString("Commands.Offline"));
+            return;
+        }
+
         if (mcMMO.p.getGeneralConfig().getPTPCommandWorldPermissions()) {
             World targetWorld = target.getWorld();
             World playerWorld = player.getWorld();

@@ -17,11 +17,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
-import org.bukkit.Bukkit;
+import java.util.stream.Collectors;
 import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -108,7 +108,7 @@ public class Party {
         List<String> onlinePlayerNames = new ArrayList<>();
 
         for (Player onlinePlayer : getOnlineMembers()) {
-            if (player != null && player.canSee(onlinePlayer)) {
+            if (player == null || player.canSee(onlinePlayer)) {
                 onlinePlayerNames.add(onlinePlayer.getName());
             }
         }
@@ -352,14 +352,15 @@ public class Party {
     public String createMembersList(Player player) {
         StringBuilder memberList = new StringBuilder();
         List<String> coloredNames = new ArrayList<>();
+        Set<UUID> visibleOnlineMemberIds = getVisibleMembers(player).stream()
+                .map(Player::getUniqueId)
+                .collect(Collectors.toSet());
 
         for (UUID playerUUID : members.keySet()) {
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
-
-            if (offlinePlayer.isOnline() && player.canSee((Player) offlinePlayer)) {
+            if (visibleOnlineMemberIds.contains(playerUUID)) {
                 ChatColor onlineColor =
                         leader.getUniqueId().equals(playerUUID) ? ChatColor.GOLD : ChatColor.GREEN;
-                coloredNames.add(onlineColor + offlinePlayer.getName());
+                coloredNames.add(onlineColor + members.get(playerUUID));
             } else {
                 coloredNames.add(ChatColor.DARK_GRAY + members.get(playerUUID));
             }

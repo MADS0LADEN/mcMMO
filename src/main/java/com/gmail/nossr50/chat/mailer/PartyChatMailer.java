@@ -1,5 +1,6 @@
 package com.gmail.nossr50.chat.mailer;
 
+import com.gmail.nossr50.chat.author.AbstractPlayerAuthor;
 import com.gmail.nossr50.chat.author.Author;
 import com.gmail.nossr50.chat.message.ChatMessage;
 import com.gmail.nossr50.chat.message.PartyChatMessage;
@@ -13,6 +14,7 @@ import com.gmail.nossr50.util.text.TextUtils;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,8 +35,11 @@ public class PartyChatMailer extends AbstractChatMailer {
     public void processChatMessage(@NotNull Author author, @NotNull String rawString,
             @NotNull Party party,
             boolean isAsync, boolean canColor, boolean isLeader) {
+        final Audience audience = author.isPlayer()
+                ? constructPartyAudience(party, ((AbstractPlayerAuthor) author).getPlayer())
+                : constructPartyAudience(party);
         PartyChatMessage chatMessage = new PartyChatMessage(
-                pluginRef, author, constructPartyAudience(party), rawString,
+                pluginRef, author, audience, rawString,
                 addStyle(author, rawString, canColor, isLeader), party);
 
         McMMOChatEvent chatEvent = new McMMOPartyChatEvent(pluginRef, chatMessage, party, isAsync);
@@ -53,6 +58,22 @@ public class PartyChatMailer extends AbstractChatMailer {
      */
     public @NotNull Audience constructPartyAudience(@NotNull Party party) {
         return mcMMO.getAudiences().filter(party.getSamePartyPredicate());
+    }
+
+    /**
+     * Constructs an {@link Audience} of party members who can see the message author.
+     *
+     * @param party target party
+     * @param author player authoring the message
+     * @return an {@link Audience} of visible party members
+     */
+    public @NotNull Audience constructPartyAudience(@NotNull Party party, @NotNull Player author) {
+        return mcMMO.getAudiences().filter(party.getSamePartyPredicate().and(sender -> {
+            if (!(sender instanceof Player recipient)) {
+                return false;
+            }
+            return recipient.equals(author) || recipient.canSee(author);
+        }));
     }
 
     /**
