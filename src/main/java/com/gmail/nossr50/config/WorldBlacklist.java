@@ -60,6 +60,8 @@ public class WorldBlacklist {
     }
 
     private void loadBlacklist(File blackListFile) {
+        blacklist.clear();
+
         FileReader fileReader = null;
         BufferedReader bufferedReader = null;
         try {

@@ -9,6 +9,7 @@ import com.gmail.nossr50.commands.McnotifyCommand;
 import com.gmail.nossr50.commands.McrefreshCommand;
 import com.gmail.nossr50.commands.McscoreboardCommand;
 import com.gmail.nossr50.commands.XprateCommand;
+import com.gmail.nossr50.commands.admin.McmmoReloadCommand;
 import com.gmail.nossr50.commands.admin.McmmoReloadLocaleCommand;
 import com.gmail.nossr50.commands.admin.PlayerDebugCommand;
 import com.gmail.nossr50.commands.chat.McChatSpy;
@@ -248,6 +249,10 @@ public final class CommandRegistrationManager {
                     McTopCommand::new),
 
             // Admin commands
+            spec("mcmmoreload", () -> "Reloads configuration", // TODO: Localize
+                    "mcmmo.commands.reload", () -> List.of(
+                            LocaleLoader.getString("Commands.Usage.0", "mcmmoreload")),
+                    McmmoReloadCommand::new),
             spec("mcmmoreloadlocale", () -> "Reloads locale", // TODO: Localize
                     "mcmmo.commands.reloadlocale", () -> List.of(
                             LocaleLoader.getString("Commands.Usage.0", "mcmmoreloadlocale")),

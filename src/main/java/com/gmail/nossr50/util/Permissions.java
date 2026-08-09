@@ -307,6 +307,10 @@ public final class Permissions {
         return permissible.hasPermission("mcmmo.commands.reloadlocale");
     }
 
+    public static boolean reload(Permissible permissible) {
+        return permissible.hasPermission("mcmmo.commands.reload");
+    }
+
     /*
      * PERKS
      */

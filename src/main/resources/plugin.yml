@@ -182,6 +182,10 @@ commands:
         aliases: [ mcreloadlocale ]
         description: Reloads locale
         permission: mcmmo.commands.reloadlocale
+    mcmmoreload:
+        aliases: [ mcreload ]
+        description: Reloads configuration
+        permission: mcmmo.commands.reload
 permissions:
     #mcmmo.defaults is the intended default permission, give this to your players for the intended experience
     mcmmo.defaults:
@@ -943,6 +947,7 @@ permissions:
             mcmmo.commands.mmoshowdb: true
             mcmmo.commands.ptp.world.all: true
             mcmmo.commands.reloadlocale: true
+            mcmmo.commands.reload: true
             mcmmo.commands.skillreset.all: true
             #            mcmmo.commands.vampirism.all: true
             mcmmo.commands.xprate.all: true

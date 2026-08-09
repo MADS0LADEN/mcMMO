@@ -101,6 +101,20 @@ public class PotionConfig extends LegacyConfigLoader {
         super("potions.yml");
     }
 
+    public void reload() {
+        concoctionsIngredientsTierOne.clear();
+        concoctionsIngredientsTierTwo.clear();
+        concoctionsIngredientsTierThree.clear();
+        concoctionsIngredientsTierFour.clear();
+        concoctionsIngredientsTierFive.clear();
+        concoctionsIngredientsTierSix.clear();
+        concoctionsIngredientsTierSeven.clear();
+        concoctionsIngredientsTierEight.clear();
+        alchemyPotions.clear();
+        loadFile();
+        loadPotions();
+    }
+
     @VisibleForTesting
     PotionConfig(File file) {
         super(file);

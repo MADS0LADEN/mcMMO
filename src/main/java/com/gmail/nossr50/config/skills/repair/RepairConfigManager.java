@@ -11,6 +11,10 @@ public class RepairConfigManager {
     public static final String REPAIR_VANILLA_YML = "repair.vanilla.yml";
     private static final Collection<Repairable> repairables = new HashSet<>();
 
+    public static void clearLoadedRepairables() {
+        repairables.clear();
+    }
+
     public RepairConfigManager(mcMMO plugin) {
         Pattern pattern = Pattern.compile("repair\\.(?:.+)\\.yml");
         File dataFolder = plugin.getDataFolder();

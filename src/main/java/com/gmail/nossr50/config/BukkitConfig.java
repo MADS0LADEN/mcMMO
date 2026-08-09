@@ -166,6 +166,20 @@ public abstract class BukkitConfig {
         }
     }
 
+    /**
+     * Re-read this config from disk and refresh cached keys.
+     * Validation failures are logged as warnings; the plugin is not disabled.
+     */
+    public void reloadFromDisk() {
+        LogUtils.debug(mcMMO.p.getLogger(), "Reloading config from disk: " + fileName);
+        this.config = initConfig();
+        loadKeys();
+        if (!validateKeys()) {
+            mcMMO.p.getLogger().warning("Errors were found in " + fileName
+                    + " after reload. Previous values may be partially applied.");
+        }
+    }
+
     public void backup() {
         LogUtils.debug(mcMMO.p.getLogger(),
                 "You are using an old version of the " + fileName + " file.");
@@ -181,7 +195,7 @@ public abstract class BukkitConfig {
         }
 
         mcMMO.p.getLogger().warning("Reloading " + fileName + " with new values...");
-        initConfig();
+        this.config = initConfig();
         loadKeys();
     }
 

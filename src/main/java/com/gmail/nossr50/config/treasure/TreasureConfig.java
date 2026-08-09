@@ -70,6 +70,9 @@ public class TreasureConfig extends BukkitConfig {
             return;
         }
 
+        excavationMap.clear();
+        hylianMap.clear();
+
         logLoadSummary(mcMMO.p.getLogger(), FILENAME, "Excavation", loadTreasures("Excavation"));
         logLoadSummary(mcMMO.p.getLogger(), FILENAME, "Hylian_Luck", loadTreasures("Hylian_Luck"));
     }

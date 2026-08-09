@@ -88,6 +88,26 @@ public class ExperienceConfig extends BukkitConfig {
         return instance;
     }
 
+    public void reload() {
+        reloadFromDisk();
+        rebuildBlockExperienceMap();
+    }
+
+    private void rebuildBlockExperienceMap() {
+        blockExperienceMap.clear();
+        for (PrimarySkillType skill : PrimarySkillType.values()) {
+            final Map<Material, Integer> experienceMap = new HashMap<>();
+            blockExperienceMap.put(skill, experienceMap);
+            for (Material material : Material.values()) {
+                final int xp = getConfigXp(skill, material);
+
+                if (xp > 0) {
+                    experienceMap.put(material, xp);
+                }
+            }
+        }
+    }
+
     @Override
     protected void loadKeys() {
         formulaType = null;

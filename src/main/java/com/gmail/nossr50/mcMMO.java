@@ -4,6 +4,7 @@ import com.gmail.nossr50.chat.ChatManager;
 import com.gmail.nossr50.commands.CommandManager;
 import com.gmail.nossr50.commands.levelup.LevelUpCommandManager;
 import com.gmail.nossr50.config.AdvancedConfig;
+import com.gmail.nossr50.config.ChatConfig;
 import com.gmail.nossr50.config.CommandOnLevelUpConfig;
 import com.gmail.nossr50.config.CoreSkillsConfig;
 import com.gmail.nossr50.config.CustomItemSupportConfig;
@@ -14,6 +15,7 @@ import com.gmail.nossr50.config.RankConfig;
 import com.gmail.nossr50.config.SoundConfig;
 import com.gmail.nossr50.config.WorldBlacklist;
 import com.gmail.nossr50.config.experience.ExperienceConfig;
+import com.gmail.nossr50.config.party.ItemWeightConfig;
 import com.gmail.nossr50.config.party.PartyConfig;
 import com.gmail.nossr50.config.skills.alchemy.PotionConfig;
 import com.gmail.nossr50.config.skills.repair.RepairConfigManager;
@@ -32,6 +34,7 @@ import com.gmail.nossr50.listeners.InventoryListener;
 import com.gmail.nossr50.listeners.PlayerListener;
 import com.gmail.nossr50.listeners.SelfListener;
 import com.gmail.nossr50.listeners.WorldListener;
+import com.gmail.nossr50.locale.LocaleLoader;
 import com.gmail.nossr50.party.PartyManager;
 import com.gmail.nossr50.placeholders.PapiExpansion;
 import com.gmail.nossr50.runnables.SaveTimerTask;
@@ -742,6 +745,75 @@ public class mcMMO extends JavaPlugin {
         final List<Salvageable> salvageables = sManager.getLoadedSalvageables();
         salvageableManager = new SimpleSalvageableManager(salvageables.size());
         salvageableManager.registerSalvageables(salvageables);
+    }
+
+    /**
+     * Re-reads configuration files from disk. Steps that fail are logged; remaining steps still run.
+     *
+     * @return {@code true} if every step succeeded
+     */
+    public boolean reloadConfigs() {
+        getLogger().info("Reloading mcMMO configuration files...");
+        boolean success = true;
+
+        success &= reloadConfigStep("config.yml", () -> generalConfig.reloadFromDisk());
+        success &= reloadConfigStep("advanced.yml", () -> advancedConfig.reloadFromDisk());
+        success &= reloadConfigStep("party.yml", () -> partyConfig.reloadFromDisk());
+        success &= reloadConfigStep("custom_item_support.yml",
+                () -> customItemSupportConfig.reloadFromDisk());
+        success &= reloadConfigStep("level_up_commands.yml",
+                () -> commandOnLevelUpConfig.reloadFromDisk());
+        success &= reloadConfigStep("experience.yml", () -> ExperienceConfig.getInstance().reload());
+        success &= reloadConfigStep("treasures.yml",
+                () -> TreasureConfig.getInstance().reloadFromDisk());
+        success &= reloadConfigStep("fishing_treasures.yml",
+                () -> FishingTreasureConfig.getInstance().reloadFromDisk());
+        success &= reloadConfigStep("skillranks.yml", () -> RankConfig.getInstance().reloadFromDisk());
+        success &= reloadConfigStep("coreskills.yml",
+                () -> CoreSkillsConfig.getInstance().reloadFromDisk());
+        success &= reloadConfigStep("sounds.yml", () -> SoundConfig.getInstance().reloadFromDisk());
+        success &= reloadConfigStep("chat.yml", () -> ChatConfig.getInstance().reloadFromDisk());
+        success &= reloadConfigStep("persistent_data.yml",
+                () -> PersistentDataConfig.getInstance().reloadFromDisk());
+        success &= reloadConfigStep("itemweights.yml",
+                () -> ItemWeightConfig.getInstance().reloadFromDisk());
+        success &= reloadConfigStep("hidden.yml", () -> HiddenConfig.getInstance().load());
+        success &= reloadConfigStep("potions.yml", () -> potionConfig.reload());
+        success &= reloadConfigStep("repair configuration", () -> {
+            RepairConfigManager.clearLoadedRepairables();
+            final List<Repairable> repairables = new ArrayList<>(
+                    new RepairConfigManager(this).getLoadedRepairables());
+            repairableManager = new SimpleRepairableManager(repairables.size());
+            repairableManager.registerRepairables(repairables);
+        });
+        success &= reloadConfigStep("salvage configuration", () -> {
+            final SalvageConfigManager salvageConfigManager = new SalvageConfigManager(this);
+            final List<Salvageable> salvageables = salvageConfigManager.getLoadedSalvageables();
+            salvageableManager = new SimpleSalvageableManager(salvageables.size());
+            salvageableManager.registerSalvageables(salvageables);
+        });
+        success &= reloadConfigStep("world blacklist", () -> worldBlacklist = new WorldBlacklist(this));
+        success &= reloadConfigStep("experience formula", () -> formulaManager = new FormulaManager());
+        success &= reloadConfigStep("locale", LocaleLoader::reloadLocale);
+
+        if (success) {
+            getLogger().info("mcMMO configuration reload completed successfully.");
+        } else {
+            getLogger().warning("mcMMO configuration reload finished with one or more errors.");
+        }
+
+        return success;
+    }
+
+    private boolean reloadConfigStep(@NotNull String description, @NotNull Runnable action) {
+        try {
+            getLogger().info("Reloading " + description + "...");
+            action.run();
+            return true;
+        } catch (Exception e) {
+            getLogger().log(Level.WARNING, "Failed to reload " + description, e);
+            return false;
+        }
     }
 
     private void registerEvents() {

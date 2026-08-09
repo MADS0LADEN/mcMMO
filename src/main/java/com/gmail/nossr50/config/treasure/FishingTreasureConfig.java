@@ -144,6 +144,10 @@ public class FishingTreasureConfig extends BukkitConfig {
             return;
         }
 
+        fishingRewards.clear();
+        fishingEnchantments.clear();
+        shakeMap.clear();
+
         if (mcMMO.getUpgradeManager().shouldUpgrade(UpgradeType.FIX_MOOSHROOM_ENTITY_ID)) {
             mcMMO.p.getLogger().log(Level.INFO,
                     "Fixing incorrect Mooshroom entity ID in fishing_treasures.yml,"
