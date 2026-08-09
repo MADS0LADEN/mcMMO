@@ -218,3 +218,30 @@ All paths relative to `src/main/java/com/gmail/nossr50/` unless noted otherwise.
 8. **Respect event cancellation.** After firing events, check `isCancelled()` and honor modifications from other plugins.
 9. **Use existing static managers** (`mcMMO.p`, etc.) when touching existing code, but do not create new static singletons.
 10. **Shade new dependencies.** Follow existing relocation patterns in `pom.xml`.
+
+---
+
+## Cursor Cloud specific instructions
+
+> Environment notes for cloud agents. Standard build/test commands live in [Build & Test](#build--test); this section only captures non-obvious caveats.
+
+### Toolchain
+
+- **JDK 21 is preinstalled; there is no JDK 17.** The build targets `--release 17`, which JDK 21 honors, so `mvn clean install` / `mvn test` build and run fine on JDK 21. Do not go hunting for a JDK 17.
+- **Maven** is installed on `PATH` (`mvn`); the startup update script warms `~/.m2` via `dependency:go-offline`, so a first `mvn` invocation is not paying the full download cost.
+
+### Tests without a container runtime
+
+- **No Docker/Podman is available in this environment.** The default Surefire config excludes the `docker` and `stress` groups (see `surefire.excludedGroups` in `pom.xml`), so plain `mvn test` runs the full unit suite (~1761 tests) green with **no** container runtime.
+- Do **not** enable the `sql-tests` / `all-heavy-tests` profiles or run `mvn verify -Psql-tests` here — the SQL Testcontainers tests need a Docker daemon and will fail. Only use those profiles after adding a container runtime.
+
+### Running the plugin end-to-end (manual testing)
+
+mcMMO is a Bukkit/Spigot/Paper server plugin — there is no standalone app. To exercise it live, build the jar and load it into a server:
+
+1. `mvn -DskipTests package` → `target/mcMMO.jar`.
+2. Download a **Paper** build that runs on **JDK 21** (e.g. 1.21.1; newer Paper 26.x requires JDK 25 and will not start here). Use the `https://fill.papermc.io/v3/...` API — the old `api.papermc.io/v2` endpoint returns HTTP 410.
+3. Server dir: `eula=true` in `eula.txt`, `online-mode=false` in `server.properties` (lets a headless bot join without auth), copy the jar into `plugins/`, start with `java -jar paper.jar --nogui`.
+4. A **mineflayer** (Node) bot can join in offline mode to drive gameplay; run server commands via the console (tmux).
+
+**Non-obvious gameplay gotcha:** mcMMO awards gathering XP **only when the correct tool is held** — Excavation needs a shovel, Mining a pickaxe, Woodcutting an axe. Breaking blocks by hand yields **zero** XP, which can look like a bug during testing. To force quick, visible level-ups, run `xprate <mult> true` from the console before farming XP.
