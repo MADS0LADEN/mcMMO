@@ -1,13 +1,19 @@
 package com.gmail.nossr50.util.commands;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
+import com.gmail.nossr50.locale.LocaleLoader;
 import com.gmail.nossr50.mcMMO;
 import java.util.List;
 import org.bukkit.Server;
+import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.AfterEach;
@@ -69,5 +75,107 @@ class CommandUtilsTest {
 
         // Then - only the visible player is listed
         assertThat(names).containsExactly("PlayerA");
+    }
+
+    @Test
+    void isChildSkillShouldSendLocalizedMessageForChildSkill() {
+        // Given - a child skill and LocaleLoader echoing keys
+        final CommandSender sender = mock(CommandSender.class);
+        try (final MockedStatic<LocaleLoader> localeLoader = mockStatic(LocaleLoader.class)) {
+            localeLoader.when(() -> LocaleLoader.getString(anyString()))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            // When - the skill is checked
+            final boolean result = CommandUtils.isChildSkill(sender, PrimarySkillType.SALVAGE);
+
+            // Then - the sender is notified with the correct locale key
+            assertThat(result).isTrue();
+            verify(sender).sendMessage("Commands.Skill.ChildSkill");
+        }
+    }
+
+    @Test
+    void isChildSkillShouldNotMessageForNonChildSkill() {
+        // Given - a primary (non-child) skill
+        final CommandSender sender = mock(CommandSender.class);
+        try (final MockedStatic<LocaleLoader> localeLoader = mockStatic(LocaleLoader.class)) {
+            localeLoader.when(() -> LocaleLoader.getString(anyString()))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            // When - the skill is checked
+            final boolean result = CommandUtils.isChildSkill(sender, PrimarySkillType.MINING);
+
+            // Then - no message is sent
+            assertThat(result).isFalse();
+            verify(sender, never()).sendMessage(anyString());
+        }
+    }
+
+    @Test
+    void isInvalidIntegerShouldSendLocalizedMessageForNonInteger() {
+        // Given - a non-integer argument
+        final CommandSender sender = mock(CommandSender.class);
+        try (final MockedStatic<LocaleLoader> localeLoader = mockStatic(LocaleLoader.class)) {
+            localeLoader.when(() -> LocaleLoader.getString(anyString()))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            // When - the value is validated
+            final boolean result = CommandUtils.isInvalidInteger(sender, "abc");
+
+            // Then - the sender is notified with the correct locale key
+            assertThat(result).isTrue();
+            verify(sender).sendMessage("Commands.Invalid.Integer");
+        }
+    }
+
+    @Test
+    void isInvalidIntegerShouldReturnFalseForValidInteger() {
+        // Given - a valid integer string
+        final CommandSender sender = mock(CommandSender.class);
+        try (final MockedStatic<LocaleLoader> localeLoader = mockStatic(LocaleLoader.class)) {
+            localeLoader.when(() -> LocaleLoader.getString(anyString()))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            // When - the value is validated
+            final boolean result = CommandUtils.isInvalidInteger(sender, "42");
+
+            // Then - validation passes without messaging the sender
+            assertThat(result).isFalse();
+            verify(sender, never()).sendMessage(anyString());
+        }
+    }
+
+    @Test
+    void isInvalidDoubleShouldSendLocalizedMessageForNonDouble() {
+        // Given - a non-double argument
+        final CommandSender sender = mock(CommandSender.class);
+        try (final MockedStatic<LocaleLoader> localeLoader = mockStatic(LocaleLoader.class)) {
+            localeLoader.when(() -> LocaleLoader.getString(anyString()))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            // When - the value is validated
+            final boolean result = CommandUtils.isInvalidDouble(sender, "abc");
+
+            // Then - the sender is notified with the correct locale key
+            assertThat(result).isTrue();
+            verify(sender).sendMessage("Commands.Invalid.Double");
+        }
+    }
+
+    @Test
+    void isInvalidDoubleShouldReturnFalseForValidDouble() {
+        // Given - a valid double string
+        final CommandSender sender = mock(CommandSender.class);
+        try (final MockedStatic<LocaleLoader> localeLoader = mockStatic(LocaleLoader.class)) {
+            localeLoader.when(() -> LocaleLoader.getString(anyString()))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            // When - the value is validated
+            final boolean result = CommandUtils.isInvalidDouble(sender, "3.14");
+
+            // Then - validation passes without messaging the sender
+            assertThat(result).isFalse();
+            verify(sender, never()).sendMessage(anyString());
+        }
     }
 }
