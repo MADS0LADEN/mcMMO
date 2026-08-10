@@ -134,9 +134,7 @@ public final class CommandRegistrationManager {
                     () -> List.of(LocaleLoader.getString("Commands.Usage.1", "mcrefresh",
                             "[" + LocaleLoader.getString("Commands.Usage.Player") + "]")),
                     McrefreshCommand::new),
-            spec("mcscoreboard",
-                    () -> "Change the current mcMMO scoreboard being displayed", //TODO: Localize
-                    "mcmmo.commands.mcscoreboard", () -> List.of(
+            spec("mcscoreboard", "mcmmo.commands.mcscoreboard", () -> List.of(
                             LocaleLoader.getString("Commands.Usage.1", "mcscoreboard",
                                     "<CLEAR | KEEP>"),
                             LocaleLoader.getString("Commands.Usage.2", "mcscoreboard", "time",
@@ -249,12 +247,10 @@ public final class CommandRegistrationManager {
                     McTopCommand::new),
 
             // Admin commands
-            spec("mcmmoreload", () -> "Reloads configuration", // TODO: Localize
-                    "mcmmo.commands.reload", () -> List.of(
+            spec("mcmmoreload", "mcmmo.commands.reload", () -> List.of(
                             LocaleLoader.getString("Commands.Usage.0", "mcmmoreload")),
                     McmmoReloadCommand::new),
-            spec("mcmmoreloadlocale", () -> "Reloads locale", // TODO: Localize
-                    "mcmmo.commands.reloadlocale", () -> List.of(
+            spec("mcmmoreloadlocale", "mcmmo.commands.reloadlocale", () -> List.of(
                             LocaleLoader.getString("Commands.Usage.0", "mcmmoreloadlocale")),
                     McmmoReloadLocaleCommand::new)
     );

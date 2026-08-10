@@ -32,8 +32,7 @@ public final class CommandUtils {
             return false;
         }
 
-        sender.sendMessage(
-                "Child skills are not supported by this command."); // TODO: Localize this
+        sender.sendMessage(LocaleLoader.getString("Commands.Skill.ChildSkill"));
         return true;
     }
 
@@ -139,7 +138,7 @@ public final class CommandUtils {
             return false;
         }
 
-        sender.sendMessage("That is not a valid integer."); // TODO: Localize
+        sender.sendMessage(LocaleLoader.getString("Commands.Invalid.Integer"));
         return true;
     }
 
@@ -148,7 +147,7 @@ public final class CommandUtils {
             return false;
         }
 
-        sender.sendMessage("That is not a valid number."); // TODO: Localize
+        sender.sendMessage(LocaleLoader.getString("Commands.Invalid.Double"));
         return true;
     }
 
